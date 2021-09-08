@@ -1,9 +1,11 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import bcrypt from 'bcrypt-nodejs';
+import cors from 'cors';
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
 const database = {
     users: [
@@ -23,13 +25,6 @@ const database = {
             entries: 0,
             joined: new Date()
         }
-    ],
-    login: [
-        {
-            id: '123',
-            email:'eyad.alomari@yahoo.com',
-            hash: ''
-        }
     ]
 }
 
@@ -38,26 +33,18 @@ app.get('/', (req, res) => {
 })
 
 app.post('/signin', (req, res) => {
-
-    bcrypt.compare("cookies", '2a$10$A.4K6nanjOa8frFyw816Q.GmgeP33Cr0V1ZmcM91dqEqb9nGtzNlu', (err, res) => {
-        console.log("first guess", res);
-    });
-
-    bcrypt.compare("cookies", '2a$10$A.4K6nanjOa8frFyw816Q.GmgeP33Cr0V1ZmcM91dqEqb9nGtzNlu', (err, res) => {
-        console.log("second guess", res);
-    });
-
+    console.log(req.body);
     if(req.body.email === database.users[0].email && req.body.password === database.users[0].password){
-        res.send('seccess');
+        res.json(database.users[0]);
     } else{
-        return res.status(400).json('error logging in');
+        res.status(400).json('error logging in');
     }
 })
 
 app.post('/register', (req, res) => {
-    
+    console.log('boddy', req.body);
     const {name, email, password} = req.body;
-
+    console.log(password);
     bcrypt.hash(password, null, null, function(err, hash) {
         console.log(hash);
     });
@@ -66,7 +53,6 @@ app.post('/register', (req, res) => {
         id: '125',
         name: name,
         email: email,
-        password: password,
         entries: 0,
         joined: new Date()
     })
@@ -90,13 +76,14 @@ app.get('/profile/:id',(req, res) => {
 })
 
 app.put('/image', (req, res) => {
-    const { id } = req.body;
+    const {id} = req.body;
+    console.log(req.body);
     let found = false;
     database.users.forEach(user => {
         if(user.id === id){
             found = true;
             user.entries++;
-            return res.json(user.entries);
+            return res.status(200).json(user.entries);
         }
     })
 
